@@ -6606,6 +6606,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_date_part_quarter() -> Result<(), CubeError> {
+        insta::assert_snapshot!(
+            "date_part_quarter",
+            execute_query(
+                "
+                SELECT
+                    t.d,
+                    date_part('quarter', t.d) q
+                FROM (
+                    SELECT TIMESTAMP '2000-01-05 00:00:00+00:00' d UNION ALL
+                    SELECT TIMESTAMP '2005-05-20 00:00:00+00:00' d UNION ALL
+                    SELECT TIMESTAMP '2010-08-02 00:00:00+00:00' d UNION ALL
+                    SELECT TIMESTAMP '2020-10-01 00:00:00+00:00' d
+                ) t
+                ORDER BY t.d ASC
+                "
+                .to_string(),
+                DatabaseProtocol::PostgreSQL
+            )
+            .await?
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
     async fn superset_meta_queries() -> Result<(), CubeError> {
         init_logger();
 
